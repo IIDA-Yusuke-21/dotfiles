@@ -12,7 +12,6 @@ uv = "latest"
 
 bat = "latest"
 bottom = "latest"
-fd = "latest"
 fzf = "latest"
 glow = "latest"
 ripgrep = "latest"

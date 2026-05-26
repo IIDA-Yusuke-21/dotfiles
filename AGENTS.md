@@ -6,7 +6,7 @@ This repository currently contains personal dotfiles with a small root-level lay
 
 - `.bashrc`: repository-managed Bash settings sourced from the user's `~/.bashrc` via `init.sh`.
 - `.tmux.conf`: tmux configuration, key bindings, pane behavior, mouse support, colors, and status-line settings.
-- `.config/mise/config.toml`: global mise tool configuration for Rust, Go, Node.js, GitHub CLI, uv, common CLI utilities, and common Cargo tools. Docker is intentionally managed outside mise.
+- `.config/mise/config.global.toml`: repository-managed source for the global mise tool configuration for Rust, Go, Node.js, GitHub CLI, uv, and common CLI utilities. `init.sh` links this file to `~/.config/mise/config.toml` so the repo itself does not act as a local mise project. Docker is intentionally managed outside mise.
 - `compose.yaml`: interactive Ubuntu container for manually testing `init.sh` from a fresh environment.
 - `init.sh`: the only setup entrypoint. It links tracked dotfiles into `$HOME`, links the repository-managed Bash config into `$HOME/.config/dotfiles/bashrc`, updates the source block in `$HOME/.bashrc`, and invokes internal setup scripts.
 - `script/`: internal setup helpers used by `init.sh`, including bashrc and mise setup. Do not add root-level setup scripts.
