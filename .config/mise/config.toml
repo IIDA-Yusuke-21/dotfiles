@@ -1,0 +1,20 @@
+[settings]
+lockfile = true
+minimum_release_age = "7d"
+node.corepack = true
+
+[tools]
+rust = "latest"
+go = "latest"
+node = "lts"
+github-cli = "latest"
+uv = "latest"
+
+bat = "latest"
+bottom = "latest"
+fd = "latest"
+fzf = "latest"
+glow = "latest"
+ripgrep = "latest"
+tmux = "latest"
+yazi = "latest"

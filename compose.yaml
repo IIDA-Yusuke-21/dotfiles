@@ -1,0 +1,48 @@
+services:
+  ubuntu:
+    image: ubuntu:26.04
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      TERM: xterm-256color
+    volumes:
+      - .:/repo:ro
+    command:
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+
+        apt-get update
+        apt-get install -y --no-install-recommends \
+          build-essential \
+          ca-certificates \
+          curl \
+          git \
+          libssl-dev \
+          pkg-config \
+          unzip \
+          xz-utils \
+          zstd
+        rm -rf /var/lib/apt/lists/*
+
+        rm -rf /workspace/dotfiles
+        mkdir -p /workspace/dotfiles
+        cp -a /repo/. /workspace/dotfiles/
+        cd /workspace/dotfiles
+
+        cat <<'EOF'
+        Ready.
+
+        This is a fresh Ubuntu container with a writable copy of the dotfiles repo:
+          /workspace/dotfiles
+
+        Try:
+          ./init.sh
+          source ~/.bashrc
+          mise doctor
+        EOF
+
+        exec bash -l
