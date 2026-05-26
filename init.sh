@@ -60,6 +60,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
+link_file "$DOTFILES_DIR/.bashrc" "$HOME/.config/dotfiles/bashrc"
 link_file "$DOTFILES_DIR/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
 
 if [ "$RUN_MISE" -eq 1 ]; then

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 BASHRC_PATH="${BASHRC_PATH:-$HOME/.bashrc}"
+DOTFILES_BASHRC_PATH="${DOTFILES_BASHRC_PATH:-$HOME/.config/dotfiles/bashrc}"
 
 info() {
   printf '==> %s\n' "$*"
@@ -12,21 +13,84 @@ die() {
   exit 1
 }
 
-append_block() {
-  local begin_marker="$1"
-  local end_marker="$2"
-  local content="$3"
-
+prepare_bashrc_path() {
   mkdir -p "$(dirname "$BASHRC_PATH")"
 
   if [ -e "$BASHRC_PATH" ] && [ ! -f "$BASHRC_PATH" ]; then
     die "not a regular file: $BASHRC_PATH"
   fi
+}
 
-  if [ -f "$BASHRC_PATH" ] && grep -Fq "$begin_marker" "$BASHRC_PATH"; then
+extract_block() {
+  local begin_marker="$1"
+  local end_marker="$2"
+  local awk_script='
+    $0 == begin_marker {
+      in_block = 1
+    }
+    in_block {
+      print
+    }
+    $0 == end_marker && in_block {
+      exit
+    }
+  '
+
+  [ -f "$BASHRC_PATH" ] || return 1
+  grep -Fq "$begin_marker" "$BASHRC_PATH" || return 1
+  awk \
+    -v begin_marker="$begin_marker" \
+    -v end_marker="$end_marker" \
+    "$awk_script" \
+    "$BASHRC_PATH"
+}
+
+remove_block() {
+  local begin_marker="$1"
+  local end_marker="$2"
+  local tmp_file
+
+  [ -f "$BASHRC_PATH" ] || return 0
+  grep -Fq "$begin_marker" "$BASHRC_PATH" || return 0
+
+  tmp_file="$(mktemp)"
+  awk \
+    -v begin_marker="$begin_marker" \
+    -v end_marker="$end_marker" \
+    '
+      $0 == begin_marker {
+        in_block = 1
+        next
+      }
+      $0 == end_marker && in_block {
+        in_block = 0
+        next
+      }
+      !in_block {
+        print
+      }
+    ' \
+    "$BASHRC_PATH" > "$tmp_file"
+  mv "$tmp_file" "$BASHRC_PATH"
+}
+
+ensure_block() {
+  local begin_marker="$1"
+  local end_marker="$2"
+  local content="$3"
+  local expected
+  local existing
+
+  prepare_bashrc_path
+  expected="$(printf '%s\n%s\n%s' "$begin_marker" "$content" "$end_marker")"
+  existing="$(extract_block "$begin_marker" "$end_marker" || true)"
+
+  if [ "$existing" = "$expected" ]; then
     info "Already configured: $BASHRC_PATH"
     return
   fi
+
+  remove_block "$begin_marker" "$end_marker"
 
   {
     printf '\n%s\n' "$begin_marker"
@@ -37,21 +101,15 @@ append_block() {
   info "Configured: $BASHRC_PATH"
 }
 
-setup_mise_fzf() {
-  append_block \
-    '# >>> dotfiles mise/fzf >>>' \
-    '# <<< dotfiles mise/fzf <<<' \
-    'if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate bash)"
-elif [ -x "$HOME/.local/bin/mise" ]; then
-  eval "$("$HOME/.local/bin/mise" activate bash)"
-elif [ -x "$HOME/.mise/bin/mise" ]; then
-  eval "$("$HOME/.mise/bin/mise" activate bash)"
-fi
+setup_dotfiles_bashrc() {
+  [ -f "$DOTFILES_BASHRC_PATH" ] || die "managed bashrc not found: $DOTFILES_BASHRC_PATH"
 
-if command -v fzf >/dev/null 2>&1; then
-  eval "$(fzf --bash)"
+  ensure_block \
+    '# >>> dotfiles bashrc >>>' \
+    '# <<< dotfiles bashrc <<<' \
+    'if [ -f "$HOME/.config/dotfiles/bashrc" ]; then
+  . "$HOME/.config/dotfiles/bashrc"
 fi'
 }
 
-setup_mise_fzf
+setup_dotfiles_bashrc
