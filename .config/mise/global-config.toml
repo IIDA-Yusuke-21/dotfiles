@@ -9,7 +9,6 @@ go = "latest"
 node = "lts"
 github-cli = "latest"
 uv = "latest"
-
 bat = "latest"
 bottom = "latest"
 fzf = "latest"

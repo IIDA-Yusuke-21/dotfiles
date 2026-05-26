@@ -2,7 +2,7 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DOTFILES_MISE_CONFIG_PATH="$DOTFILES_DIR/.config/mise/config.global.toml"
+DOTFILES_MISE_CONFIG_PATH="$DOTFILES_DIR/.config/mise/global-config.toml"
 MISE_CONFIG_PATH="$HOME/.config/mise/config.toml"
 
 info() {
@@ -60,8 +60,8 @@ if [ -e "$MISE_CONFIG_PATH" ] || [ -L "$MISE_CONFIG_PATH" ]; then
   "$MISE_BIN" trust "$MISE_CONFIG_PATH" >/dev/null
 fi
 
-info "Installing tools from mise config"
-"$MISE_BIN" install
+info "Installing tools from global mise config"
+"$MISE_BIN" install --cd "$HOME"
 
 info "mise development environment is ready"
 info "Config: $DOTFILES_MISE_CONFIG_PATH"
