@@ -1,0 +1,44 @@
+# dotfiles
+
+This is a personal dotfiles repository. `init.sh` links each managed config file into `$HOME` and sets up the required development tools.
+
+## Trying It with Docker
+
+You can test `init.sh` in a fresh environment on Docker. This is useful when you want to verify the setup without modifying your host `$HOME`.
+
+### Prerequisites
+
+- Docker Engine and `docker compose` must be available
+
+### Start the Container
+
+Run the following from the repository root:
+
+```bash
+docker compose run --rm ubuntu
+```
+
+The first run may take a little time because the container installs required packages with `apt-get`.
+
+### What the Container Does
+
+- Uses `ubuntu:26.04` as the base image
+- Mounts the repository at `/repo` as read-only
+- Creates a writable working copy at `/workspace/dotfiles`
+- Starts the shell in `/workspace/dotfiles`
+
+After startup, you can try:
+
+```bash
+./init.sh
+source ~/.bashrc
+mise doctor
+```
+
+If you only want to verify symlink creation, run:
+
+```bash
+./init.sh --links-only
+```
+
+Run `exit` when you are done. Because the command uses `--rm`, the container is removed automatically after it exits.
