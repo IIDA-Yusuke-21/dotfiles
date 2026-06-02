@@ -23,6 +23,7 @@ services:
           git \
           libssl-dev \
           pkg-config \
+          tmux \
           unzip \
           xz-utils \
           zstd

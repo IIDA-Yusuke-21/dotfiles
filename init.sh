@@ -59,7 +59,7 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-link_file "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
+"$DOTFILES_DIR/script/setup-tmux.sh"
 link_file "$DOTFILES_DIR/.bashrc" "$HOME/.config/dotfiles/bashrc"
 link_file "$DOTFILES_DIR/.config/mise/global-config.toml" "$HOME/.config/mise/config.toml"
 
