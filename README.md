@@ -41,4 +41,10 @@ If you only want to verify symlink creation, run:
 ./init.sh --links-only
 ```
 
+If you update `.config/mise/global-config.toml` and only want to re-apply the mise configuration, run:
+
+```bash
+./sync-mise.sh
+```
+
 Run `exit` when you are done. Because the command uses `--rm`, the container is removed automatically after it exits.

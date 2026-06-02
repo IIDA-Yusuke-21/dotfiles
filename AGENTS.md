@@ -6,10 +6,11 @@ This repository currently contains personal dotfiles with a small root-level lay
 
 - `.bashrc`: repository-managed Bash settings sourced from the user's `~/.bashrc` via `init.sh`.
 - `.tmux.conf`: tmux configuration, key bindings, pane behavior, mouse support, colors, and status-line settings.
-- `.config/mise/global-config.toml`: repository-managed source for the global mise tool configuration for Rust, Go, Node.js, GitHub CLI, uv, and common CLI utilities. `init.sh` links this file to `~/.config/mise/config.toml` so the repo itself does not act as a local mise project. Docker is intentionally managed outside mise.
+- `.config/mise/global-config.toml`: repository-managed source for the global mise tool configuration for Rust, Go, Node.js, GitHub CLI, uv, and common CLI utilities. Root-level setup entrypoints link this file to `~/.config/mise/config.toml` so the repo itself does not act as a local mise project. Docker is intentionally managed outside mise.
 - `compose.yaml`: interactive Ubuntu container for manually testing `init.sh` from a fresh environment.
-- `init.sh`: the only setup entrypoint. It links tracked dotfiles into `$HOME`, links the repository-managed Bash config into `$HOME/.config/dotfiles/bashrc`, updates the source block in `$HOME/.bashrc`, and invokes internal setup scripts.
-- `script/`: internal setup helpers used by `init.sh`, including bashrc and mise setup. Do not add root-level setup scripts.
+- `init.sh`: the primary bootstrap entrypoint. It links tracked dotfiles into `$HOME`, links the repository-managed Bash config into `$HOME/.config/dotfiles/bashrc`, updates the source block in `$HOME/.bashrc`, and invokes internal setup scripts.
+- `sync-mise.sh`: focused mise entrypoint that links the repository-managed mise config and reapplies mise-managed tool installation.
+- `script/`: internal setup helpers used by root-level entrypoints, including bashrc and mise setup.
 - `.agents/` and `.codex/`: local agent/config directories. Keep generated or machine-specific state out of versioned files unless it is intentionally shared.
 
 Place future dotfiles at the repository root using their installed names, for example `.vimrc`, `.zshrc`, or `.config/<tool>/config`. If a tool needs several files, prefer a dedicated subdirectory that mirrors its target path.
@@ -21,6 +22,7 @@ There is no build step for this repository. Useful validation commands are:
 - `git status --short`: check pending changes before editing or committing.
 - `./init.sh`: install dotfile symlinks, update the managed source block in `$HOME/.bashrc`, and install/update mise-managed development tools.
 - `./init.sh --links-only`: install dotfile symlinks without touching `$HOME/.bashrc` or running mise setup.
+- `./sync-mise.sh`: link the repository-managed mise config into `$HOME` and re-apply mise-managed development tools after editing `.config/mise/global-config.toml`.
 - `docker compose run --rm ubuntu`: start a fresh Ubuntu 26.04 container with a writable repo copy for interactive `./init.sh` testing.
 - `tmux source-file ~/.tmux.conf`: reload the installed tmux config in an existing tmux session.
 - `tmux -f .tmux.conf new-session -d -s dotfiles-check`: parse this repository's tmux config in a detached session.
