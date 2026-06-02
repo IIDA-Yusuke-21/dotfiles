@@ -56,7 +56,7 @@ tmux_conf_new_pane_retain_current_path=true
 #   - true
 #   - false (default)
 #   - disabled (do not modify split-window bindings)
-tmux_conf_new_pane_reconnect_ssh=false
+tmux_conf_new_pane_reconnect_ssh=true
 
 
 # -- display -------------------------------------------------------------------
@@ -145,7 +145,7 @@ tmux_conf_theme_pane_border="$tmux_conf_theme_colour_2"
 tmux_conf_theme_pane_active_border="$tmux_conf_theme_colour_5"
 %if #{>=:#{version},3.2}
 tmux_conf_theme_pane_border="#{?synchronize-panes,$tmux_conf_theme_colour_16,$tmux_conf_theme_colour_2}"
-tmux_conf_theme_pane_active_border="#{?synchronize-panes,$tmux_conf_theme_colour_16,#{$tmux_conf_theme_colour_5}}"
+tmux_conf_theme_pane_active_border="#{?synchronize-panes,$tmux_conf_theme_colour_16,$tmux_conf_theme_colour_5}"
 %endif
 
 # pane indicator colours (when you hit <prefix> + q)
@@ -269,8 +269,8 @@ tmux_conf_theme_right_separator_sub='\uE0B3'
 #     - #{uptime_s}
 #     - #{username}
 #     - #{username_ssh}
-tmux_conf_theme_status_left=" #{username}  ,  #{hostname} "
-tmux_conf_theme_status_right=" CPU: #{loadavg_1m} , #{?uptime_y,#{uptime_y}y ,}#{?uptime_d,#{uptime_d}d ,}#{?uptime_h,#{uptime_h}h ,}#{?uptime_m,#{uptime_m}m,#{?uptime_s,#{uptime_s}s,0m}} , %H:%M , %Y/%m/%d "
+tmux_conf_theme_status_left="  #{username}  ,  #{hostname}  "
+tmux_conf_theme_status_right=" CPU: #{load_1m} , #{?uptime_y,#{uptime_y}y ,}#{?uptime_d,#{uptime_d}d ,}#{?uptime_h,#{uptime_h}h ,}#{?uptime_m,#{uptime_m}m,#{?uptime_s,#{uptime_s}s,0m}} , %H:%M , %Y/%m/%d (%a) "
 
 # status left style
 tmux_conf_theme_status_left_fg="$tmux_conf_theme_colour_3"
@@ -386,7 +386,7 @@ tmux_conf_urlscan_options="--compact --dedupe"
 #set -g history-limit 10000
 
 # start with mouse mode enabled
-#set -g mouse on
+set -g mouse on #!important
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
@@ -413,8 +413,8 @@ unbind -n C-Right #!important
 unbind -n C-Up #!important
 
 bind b set-window-option synchronize-panes #!important
-bind ^ split-window -h #!important
-bind - split-window -v #!important
+bind ^ run-shell 'cut -c3- "$TMUX_CONF" | sh -s _split_window #{pane_pid} #{b:pane_tty} -c "#{pane_current_path}" -h' #!important
+bind - run-shell 'cut -c3- "$TMUX_CONF" | sh -s _split_window #{pane_pid} #{b:pane_tty} -c "#{pane_current_path}" -v' #!important
 
 bind -n M-h select-pane -L #!important
 bind -n M-j select-pane -D #!important
@@ -503,8 +503,8 @@ tmux_conf_uninstall_plugins_on_reload=true
 #   sleep 900                                         # sleep for 15 minutes, throttle network requests whatever the value of status-interval
 # }
 #
-# # usage: #{loadavg_1m}
-# loadavg_1m() {
+# # usage: #{load_1m}
+# load_1m() {
 #   if [ -r /proc/loadavg ]; then
 #     cut -d' ' -f1 /proc/loadavg
 #   else
