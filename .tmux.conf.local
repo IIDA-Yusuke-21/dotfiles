@@ -269,7 +269,7 @@ tmux_conf_theme_right_separator_sub='\uE0B3'
 #     - #{uptime_s}
 #     - #{username}
 #     - #{username_ssh}
-tmux_conf_theme_status_left="  #{username}  ,  #{hostname}  "
+tmux_conf_theme_status_left="  #{username}  ,  #{hostname}  ,  #S  "
 tmux_conf_theme_status_right=" CPU: #{load_1m} , #{?uptime_y,#{uptime_y}y ,}#{?uptime_d,#{uptime_d}d ,}#{?uptime_h,#{uptime_h}h ,}#{?uptime_m,#{uptime_m}m,#{?uptime_s,#{uptime_s}s,0m}} , %H:%M , %Y/%m/%d (%a) "
 
 # status left style
