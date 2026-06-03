@@ -1,1 +1,22 @@
 set linenumbers
+set constantshow
+set autoindent
+set tabsize 4
+set softwrap
+set mouse
+set positionlog
+set afterends
+set atblanks
+set zap
+set tabstospaces
+
+include "/usr/share/nano/*.nanorc"
+
+# key bind
+unbind ^W main
+bind ^F whereis main
+bind ^H replace main
+bind ^Z undo main
+bind ^Y redo main
+bind ^A home main
+bind ^E end main

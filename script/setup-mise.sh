@@ -63,5 +63,10 @@ fi
 info "Installing tools from global mise config"
 "$MISE_BIN" install --cd "$HOME"
 
+if "$MISE_BIN" which broot >/dev/null 2>&1; then
+  info "Installing broot shell function"
+  "$MISE_BIN" x -- broot --install
+fi
+
 info "mise development environment is ready"
 info "Config: $DOTFILES_MISE_CONFIG_PATH"
