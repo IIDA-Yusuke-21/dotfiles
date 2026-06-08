@@ -437,6 +437,8 @@ bind m run "cut -c3- '#{TMUX_CONF}' | sh -s _toggle_mouse" \; display 'mouse #{?
 #set -g status-position top
 set -g status-justify left #!important
 
+# Prefix + 4 で画面を均等に4分割（田の字）にする
+bind 4 split-window -h \; select-layout tiled \; split-window -v \; select-layout tiled \; split-window -v \; select-layout tiled
 
 # -- tpm -----------------------------------------------------------------------
 
