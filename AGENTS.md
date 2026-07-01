@@ -12,6 +12,7 @@ This repository currently contains personal dotfiles with a small root-level lay
 - `compose.yaml`: interactive Ubuntu container for manually testing `init.sh` from a fresh environment.
 - `init.sh`: the primary bootstrap entrypoint. It links tracked dotfiles into `$HOME`, links the repository-managed Bash config into `$HOME/.config/dotfiles/bashrc`, configures Oh my tmux!, updates the source block in `$HOME/.bashrc`, and invokes internal setup scripts.
 - `sync-mise.sh`: focused mise entrypoint that links the repository-managed mise config and reapplies mise-managed tool installation.
+- `update.sh`: repository-managed update script. It runs `./sync-mise.sh`, `mise self-update`, and `mise upgrade` to keep the mise configuration and managed tools up to date.
 - `script/`: internal setup helpers used by root-level entrypoints, including bashrc and mise setup.
 - `.agents/` and `.codex/`: local agent/config directories. Keep generated or machine-specific state out of versioned files unless it is intentionally shared.
 
@@ -26,6 +27,7 @@ There is no build step for this repository. Useful validation commands are:
 - `./init.sh`: install dotfile symlinks, update the managed source block in `$HOME/.bashrc`, and install/update mise-managed development tools.
 - `./init.sh --links-only`: install dotfile symlinks without touching `$HOME/.bashrc` or running mise setup.
 - `./sync-mise.sh`: link the repository-managed mise config into `$HOME` and re-apply mise-managed development tools after editing `.config/mise/global-config.toml`.
+- `./update.sh`: sync the repository-managed mise config, self-update mise, and upgrade all managed tools.
 - `docker compose run --rm ubuntu`: start a fresh Ubuntu 26.04 container with a writable repo copy for interactive `./init.sh` testing.
 - `tmux source-file ~/.tmux.conf`: reload the installed tmux config in an existing tmux session.
 - `tmux -f "$HOME/.tmux.conf" new-session -d -s dotfiles-check`: parse the installed tmux config in a detached session.
