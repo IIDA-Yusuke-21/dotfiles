@@ -63,6 +63,7 @@ done
 link_file "$DOTFILES_DIR/.bashrc" "$HOME/.config/dotfiles/bashrc"
 link_file "$DOTFILES_DIR/.nanorc" "$HOME/.nanorc"
 link_file "$DOTFILES_DIR/.config/mise/global-config.toml" "$HOME/.config/mise/config.toml"
+link_file "$DOTFILES_DIR/.config/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
 if [ "$RUN_MISE" -eq 1 ]; then
   "$DOTFILES_DIR/script/setup-mise.sh"
