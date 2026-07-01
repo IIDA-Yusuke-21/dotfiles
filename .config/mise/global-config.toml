@@ -17,6 +17,8 @@ herdr = "latest"
 ripgrep = "latest"
 tmux = "latest"
 yazi = "latest"
+zoxide = "latest"
 tlrc = "latest"
 lazygit = "latest"
 "cargo:broot" = "latest"
+
