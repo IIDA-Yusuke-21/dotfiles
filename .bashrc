@@ -12,3 +12,5 @@ fi
 
 export EDITOR="nano"
 export VISUAL="nano"
+
+eval "$(zoxide init bash)"
