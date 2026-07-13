@@ -21,4 +21,4 @@ zoxide = "latest"
 tlrc = "latest"
 lazygit = "latest"
 "cargo:broot" = "latest"
-
+"github:sinelaw/fresh" = "latest"

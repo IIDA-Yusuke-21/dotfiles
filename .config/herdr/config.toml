@@ -4,7 +4,10 @@ agent_panel_sort = "priority"
 prompt_new_tab_name = false
 pane_borders = true
 pane_gaps = false
+right_click_passthrough_modifier = "ctrl"
+mobile_width_threshold = 64
 
+show_agent_labels_on_pane_borders = true
 [ui.toast]
 delivery = "herdr"
 delay_seconds = 1
@@ -33,7 +36,19 @@ previous_tab = "alt+shift+h"
 next_tab = "alt+shift+l"
 
 [[keys.command]]
-key = "prefix+alt+g"
+key = "prefix+p"
 type = "pane"
-command = "lazygit"
-description = "run lazygit"
+command = "bash"
+description = "open bash"
+
+[experimental]
+pane_history = true
+switch_ascii_input_source_in_prefix = false
+
+[session]
+resume_agents_on_restore = false
+
+[update]
+channel = "stable"
+version_check = true
+manifest_check = true
