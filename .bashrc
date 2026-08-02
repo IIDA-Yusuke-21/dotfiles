@@ -10,7 +10,9 @@ if command -v fzf >/dev/null 2>&1; then
   eval "$(fzf --bash)"
 fi
 
-export EDITOR="nano"
-export VISUAL="nano"
+export EDITOR="fresh"
+export VISUAL="fresh"
 
 eval "$(zoxide init bash)"
+
+export FZF_DEFAULT_OPTS='--preview "file --mime-type -b {} | grep -q ^image/ && chafa --size ${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES} {} || bat --color=always --style=header,grid --line-range :100 {}"'
