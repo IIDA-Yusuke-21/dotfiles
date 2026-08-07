@@ -50,7 +50,7 @@ previous_tab = "alt+shift+h"
 next_tab = "alt+shift+l"
 
 [[keys.command]]
-key = "prefix+shift+g"
+key = "ctrl+g"
 type = "popup"
 command = "lazygit"
 description = "open lazygit"
