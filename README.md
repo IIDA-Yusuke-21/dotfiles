@@ -6,15 +6,16 @@ If `init.sh` finds an unmanaged file where a symlink should go, it leaves that f
 
 ## Optional OS Packages
 
-Every tool in `.config/mise/global-config.toml` is installed by mise. Two commands used by the fzf preview are not available through mise and must come from the OS package manager instead:
+Every tool in `.config/mise/global-config.toml` is installed by mise. Some commands used by the fzf preview and Neovim image rendering are not available through mise and must come from the OS package manager instead:
 
 - `file` — detects whether the previewed path is an image
 - `chafa` — renders that image in the terminal
+- `imagemagick` — converts and scales images for `image.nvim`
 
-The preview degrades gracefully when they are missing (`chafa` → `bat` → `head`), so installing them is optional. On Debian and Ubuntu:
+The preview degrades gracefully when `file` or `chafa` is missing (`chafa` → `bat` → `head`), but ImageMagick is required by `image.nvim`. On Debian and Ubuntu:
 
 ```bash
-sudo apt-get install file chafa
+sudo apt-get install file chafa imagemagick
 ```
 
 ## tmux
@@ -109,7 +110,9 @@ The submodule is never moved automatically: `.tmux.conf.local` is a fork of the 
 
 ## Neovim
 
-The repository includes a small, plugin-free starter configuration. It is linked to `$HOME/.config/nvim/init.lua` by `init.sh`, and Neovim is installed by mise.
+The repository includes a small Neovim configuration managed by lazy.nvim. It is linked to `$HOME/.config/nvim/init.lua` by `init.sh`, and Neovim is installed by mise.
+
+`image.nvim` renders images in Markdown and other supported buffers through the Kitty graphics protocol. Use Kitty, or a compatible terminal such as Herdr, and keep tmux at version 3.3 or newer. The tmux configuration enables the passthrough settings required for image rendering.
 
 After setup, start it with:
 

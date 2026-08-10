@@ -388,6 +388,11 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # start with mouse mode enabled
 set -g mouse on #!important
 
+# Allow image.nvim to pass Kitty graphics escape sequences through tmux.
+set -gq allow-passthrough on
+set -g visual-activity off
+set-option -g focus-events on
+
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual
 #set -g status-keys vi

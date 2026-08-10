@@ -47,6 +47,14 @@ require("lazy").setup({
     opts = {},
   },
   {
+    "3rd/image.nvim",
+    build = false,
+    opts = {
+      backend = "kitty",
+      processor = "magick_cli",
+    },
+  },
+  {
     'nvim-telescope/telescope.nvim', version = '*',
     dependencies = {
         'nvim-lua/plenary.nvim',
