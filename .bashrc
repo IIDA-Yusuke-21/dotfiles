@@ -10,8 +10,8 @@ if command -v fzf >/dev/null 2>&1; then
   eval "$(fzf --bash)"
 fi
 
-export EDITOR="vim"
-export VISUAL="vim"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
 eval "$(zoxide init bash)"
 

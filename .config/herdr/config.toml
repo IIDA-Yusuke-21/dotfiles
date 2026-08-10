@@ -50,7 +50,7 @@ previous_tab = "alt+shift+h"
 next_tab = "alt+shift+l"
 
 [[keys.command]]
-key = "ctrl+g"
+key = "prefix+shift+g"
 type = "popup"
 command = "lazygit"
 description = "open lazygit"
@@ -78,11 +78,6 @@ command = "explorer.exe ."
 description = "open explorer in the current directory"
 
 [[keys.command]]
-key = "prefix+shift+r"
-type = "plugin_action"
-command = "persiyanov.reviewr.toggle"
-
-[[keys.command]]
 key = "prefix+<"
 type = "popup"
 command = "$EDITOR ~/.config/herdr/config.toml"
@@ -105,7 +100,7 @@ switch_ascii_input_source_in_prefix = false
 kitty_graphics = true
 
 [session]
-resume_agents_on_restore = false
+resume_agents_on_restore = true 
 
 [update]
 channel = "stable"

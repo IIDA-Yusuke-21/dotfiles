@@ -63,4 +63,18 @@ If you update `.config/mise/global-config.toml` and only want to re-apply the mi
 ./sync-mise.sh
 ```
 
+## Neovim
+
+The repository includes a small, plugin-free starter configuration. It is linked to `$HOME/.config/nvim/init.lua` by `init.sh`, and Neovim is installed by mise.
+
+After setup, start it with:
+
+```bash
+./init.sh
+source ~/.bashrc
+nvim
+```
+
+The space key is the leader key: `Space w` saves, `Space q` quits, and `Space e` opens the file explorer. Use `i` to insert text, `Esc` to return to normal mode, and `:Tutor` for the built-in tutorial. `Ctrl-h/j/k/l` moves between split windows.
+
 Run `exit` when you are done. Because the command uses `--rm`, the container is removed automatically after it exits.
