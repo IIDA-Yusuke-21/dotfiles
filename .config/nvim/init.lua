@@ -157,38 +157,99 @@ require("lazy").setup({
     event = "VimEnter",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
+      -- Widest a recent-file entry may get. The doom theme pads every center
+      -- entry out to the widest one before centring the block, so an
+      -- unbounded path would drag the whole menu sideways.
+      local max_desc_width = 46
+
+      local function pad_right(str, width)
+        return str .. (" "):rep(math.max(0, width - vim.fn.strdisplaywidth(str)))
+      end
+
+      -- Paths are cut from the left: the tail (the directory the file
+      -- actually sits in) identifies an entry better than the root does.
+      local function truncate_left(str, width)
+        if vim.fn.strdisplaywidth(str) <= width then
+          return str
+        end
+        for i = 1, vim.fn.strchars(str) do
+          local tail = vim.fn.strcharpart(str, i)
+          if vim.fn.strdisplaywidth(tail) + 1 <= width then
+            return "…" .. tail
+          end
+        end
+        return "…"
+      end
+
+      -- Directory halves of the recent-file entries, dimmed once the buffer
+      -- is drawn. The doom theme highlights each description as a single
+      -- run, so the two columns have to be split apart with extmarks.
+      -- Each target carries the entry's whole rendered text and the byte
+      -- range of the directory within it: matching on the directory alone
+      -- would also hit the version string in the header and any file name
+      -- that happens to contain the same characters.
+      local dim_targets = {}
+
       -- The most recently edited files, newest first. v:oldfiles keeps entries
       -- for files that have since been deleted or moved, so unreadable paths
       -- are dropped rather than shown as dead menu items.
       local function recent_files(limit)
-        local entries = {}
+        local paths = {}
         for _, path in ipairs(vim.v.oldfiles or {}) do
           if vim.fn.filereadable(path) == 1 then
-            table.insert(entries, {
-              icon = "  ",
-              desc = vim.fn.fnamemodify(path, ":~:."),
-              key = tostring(#entries + 1),
-              action = "edit " .. vim.fn.fnameescape(path),
-            })
-            if #entries == limit then
+            table.insert(paths, path)
+            if #paths == limit then
               break
             end
           end
+        end
+
+        -- File names share a column, so the directories line up too.
+        local name_width = 0
+        for _, path in ipairs(paths) do
+          name_width = math.max(name_width, vim.fn.strdisplaywidth(vim.fs.basename(path)))
+        end
+
+        local devicons = require("nvim-web-devicons")
+        local entries = {}
+        for i, path in ipairs(paths) do
+          local name = vim.fs.basename(path)
+          local dir = truncate_left(
+            vim.fn.fnamemodify(path, ":~:.:h"),
+            max_desc_width - name_width - 2
+          )
+          local icon, icon_hl = devicons.get_icon(name, vim.fn.fnamemodify(name, ":e"), { default = true })
+          local entry_icon = icon .. "  "
+          local desc = pad_right(name, name_width) .. "  " .. dir
+          table.insert(dim_targets, {
+            text = entry_icon .. desc,
+            offset = #entry_icon + #desc - #dir,
+            len = #dir,
+          })
+          table.insert(entries, {
+            icon = entry_icon,
+            icon_hl = icon_hl,
+            desc = desc,
+            key = tostring(i),
+            action = "edit " .. vim.fn.fnameescape(path),
+          })
         end
         return entries
       end
 
       local center = {
-        { icon = "  ", desc = "Find File", key = "f", action = function() Snacks.picker.files() end },
-        { icon = "  ", desc = "Recent Files", key = "r", action = function() Snacks.picker.recent() end },
-        { icon = "  ", desc = "Live Grep", key = "g", action = function() Snacks.picker.grep() end },
-        { icon = "  ", desc = "New File", key = "n", action = "enew | startinsert" },
-        { icon = "  ", desc = "Config", key = "c", action = "edit " .. vim.fn.stdpath("config") .. "/init.lua" },
+        { icon = "󰈞  ", desc = "Find File", key = "f", action = function() Snacks.picker.files() end },
+        { icon = "󱎸  ", desc = "Live Grep", key = "g", action = function() Snacks.picker.grep() end },
+        { icon = "󰝒  ", desc = "New File", key = "n", action = "enew | startinsert" },
+        { icon = "󰒓  ", desc = "Config", key = "c", action = "edit " .. vim.fn.stdpath("config") .. "/init.lua" },
+        -- Heading for the entries below as much as an action of its own: the
+        -- doom theme derives its highlight mapping by counting rendered lines
+        -- that contain a word character, so a rule or blank spacer entry
+        -- would shift that mapping and break the draw. [r] opens the picker
+        -- over every recent file; [1]..[5] jump straight to one.
+        { icon = "󰋚  ", desc = "Recent Files", key = "r", action = function() Snacks.picker.recent() end },
       }
 
-      -- Appended directly: the doom theme pairs each center entry with a
-      -- rendered line containing a word character, so a blank spacer entry
-      -- would shift that mapping and break the draw.
       vim.list_extend(center, recent_files(5))
 
       local elapsed_ms = (vim.uv.hrtime() - start_time) / 1e6
@@ -249,6 +310,25 @@ require("lazy").setup({
                   priority = 5000,
                 })
                 from = col + #char
+              end
+            end
+          end
+
+          -- Second pass, over the menu: the directory column is pushed back
+          -- so the file names carry the line. Only the leading indent varies
+          -- between the entry as built and the entry as drawn, so locating
+          -- the whole entry gives the directory's position within the line.
+          for lnum, line in ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false)) do
+            for _, target in ipairs(dim_targets) do
+              local at = line:find(target.text, 1, true)
+              if at then
+                local col = at - 1 + target.offset
+                vim.api.nvim_buf_set_extmark(buf, mark_ns, lnum - 1, col, {
+                  end_col = col + target.len,
+                  hl_group = "Comment",
+                  priority = 5000,
+                })
+                break
               end
             end
           end
