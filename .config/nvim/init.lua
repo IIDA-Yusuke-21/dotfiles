@@ -69,6 +69,7 @@ local opt = vim.opt
 
 -- Display and navigation
 opt.number = true
+opt.relativenumber = true
 opt.cursorline = true
 opt.signcolumn = "yes"
 opt.mouse = "a"
@@ -131,6 +132,30 @@ map("n", "N", "Nzzzv", opts)
 
 -- Use the current working directory for :find and :Explore.
 vim.cmd([[autocmd BufEnter * silent! lcd %:p:h]])
+
+-- Relative line numbers only where they are useful: they help count motions
+-- (3j, 5dd) in normal mode, but flicker distractingly while typing and are
+-- meaningless in a window you are not moving around in. Windows that turned
+-- 'number' off entirely (nvim-tree, pickers) are left alone.
+local relnu = vim.api.nvim_create_augroup("relative_number_in_normal_mode", {})
+
+vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "WinEnter", "FocusGained" }, {
+  group = relnu,
+  callback = function()
+    if vim.wo.number and vim.api.nvim_get_mode().mode ~= "i" then
+      vim.wo.relativenumber = true
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave", "FocusLost" }, {
+  group = relnu,
+  callback = function()
+    if vim.wo.number then
+      vim.wo.relativenumber = false
+    end
+  end,
+})
 
 -- Reopen files at the cursor position from the previous session.
 vim.api.nvim_create_autocmd("BufReadPost", {
