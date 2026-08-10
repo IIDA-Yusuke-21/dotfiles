@@ -19,7 +19,9 @@ services:
         apt-get install -y --no-install-recommends \
           build-essential \
           ca-certificates \
+          chafa \
           curl \
+          file \
           git \
           libssl-dev \
           pkg-config \

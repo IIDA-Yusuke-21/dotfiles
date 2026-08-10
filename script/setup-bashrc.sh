@@ -24,6 +24,8 @@ prepare_bashrc_path() {
 extract_block() {
   local begin_marker="$1"
   local end_marker="$2"
+  # The awk program is passed verbatim; $0 belongs to awk, not to the shell.
+  # shellcheck disable=SC2016
   local awk_script='
     $0 == begin_marker {
       in_block = 1
@@ -104,6 +106,9 @@ ensure_block() {
 setup_dotfiles_bashrc() {
   [ -f "$DOTFILES_BASHRC_PATH" ] || die "managed bashrc not found: $DOTFILES_BASHRC_PATH"
 
+  # $HOME must stay literal: it is written into ~/.bashrc and expanded when
+  # that file is sourced, not now.
+  # shellcheck disable=SC2016
   ensure_block \
     '# >>> dotfiles bashrc >>>' \
     '# <<< dotfiles bashrc <<<' \

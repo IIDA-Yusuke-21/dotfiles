@@ -2,40 +2,11 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=script/lib.sh
+. "$DOTFILES_DIR/script/lib.sh"
+
 DOTFILES_MISE_CONFIG_PATH="$DOTFILES_DIR/.config/mise/global-config.toml"
 MISE_CONFIG_PATH="$HOME/.config/mise/config.toml"
-
-info() {
-  printf '==> %s\n' "$*"
-}
-
-die() {
-  printf 'ERROR: %s\n' "$*" >&2
-  exit 1
-}
-
-has() {
-  command -v "$1" >/dev/null 2>&1
-}
-
-resolve_mise() {
-  if has mise; then
-    command -v mise
-    return
-  fi
-
-  if [ -x "$HOME/.local/bin/mise" ]; then
-    printf '%s\n' "$HOME/.local/bin/mise"
-    return
-  fi
-
-  if [ -x "$HOME/.mise/bin/mise" ]; then
-    printf '%s\n' "$HOME/.mise/bin/mise"
-    return
-  fi
-
-  return 1
-}
 
 install_mise() {
   if MISE_BIN="$(resolve_mise)"; then

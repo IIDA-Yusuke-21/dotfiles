@@ -1,4 +1,7 @@
 [settings]
+# Only takes effect for project configs (a mise.lock next to a mise.toml); mise
+# writes no lockfile for this global config. Reproducibility here comes from the
+# exact version pins below, which ./update.sh --bump rewrites.
 lockfile = true
 minimum_release_age = "7d"
 node.corepack = true

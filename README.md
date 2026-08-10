@@ -2,6 +2,21 @@
 
 This is a personal dotfiles repository. `init.sh` links each managed config file into `$HOME` and sets up the required development tools.
 
+If `init.sh` finds an unmanaged file where a symlink should go, it leaves that file alone, lists every skipped path at the end, and exits non-zero. Move or remove the listed paths and run it again.
+
+## Optional OS Packages
+
+Every tool in `.config/mise/global-config.toml` is installed by mise. Two commands used by the fzf preview are not available through mise and must come from the OS package manager instead:
+
+- `file` — detects whether the previewed path is an image
+- `chafa` — renders that image in the terminal
+
+The preview degrades gracefully when they are missing (`chafa` → `bat` → `head`), so installing them is optional. On Debian and Ubuntu:
+
+```bash
+sudo apt-get install file chafa
+```
+
 ## tmux
 
 This repository uses [Oh my tmux!](https://github.com/gpakosz/.tmux) as a git submodule at `.tmux`.
@@ -62,6 +77,35 @@ If you update `.config/mise/global-config.toml` and only want to re-apply the mi
 ```bash
 ./sync-mise.sh
 ```
+
+## Existing Files
+
+All three scripts share one policy, implemented in `script/lib.sh`: a file that is already sitting where a symlink should go is never touched. The path is reported, and the script exits non-zero so the incomplete setup is visible.
+
+Pass `--force` to `init.sh` or `sync-mise.sh` to move those files into `.backup/` with a timestamped name and link over them instead.
+
+```bash
+./init.sh --force
+```
+
+The one exception is `$HOME/.tmux.conf`: when it already points at some other Oh my tmux! checkout it is a copy of the same upstream file, so it is replaced without a backup.
+
+## Updating
+
+```bash
+./update.sh
+```
+
+`update.sh` re-syncs the mise config, updates mise itself, upgrades tools, reports unused tool versions, and checks whether the Oh my tmux! submodule has upstream changes.
+
+Because every tool is pinned to an exact version, a plain run cannot move any version. Use the flags for that:
+
+| Flag | Effect |
+| --- | --- |
+| `--bump` | Upgrade to the latest versions and rewrite the pins in `.config/mise/global-config.toml`, so the change becomes a reviewable diff to commit |
+| `--prune` | Delete installed tool versions no config references any more (they are only listed otherwise) |
+
+The submodule is never moved automatically: `.tmux.conf.local` is a fork of the upstream template, so check what changed upstream before running `git submodule update --remote .tmux`.
 
 ## Neovim
 
