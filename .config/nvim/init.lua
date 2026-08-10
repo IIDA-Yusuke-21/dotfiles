@@ -17,8 +17,32 @@ if not vim.uv.fs_stat(lazypath) then
   end
 end
 vim.opt.rtp:prepend(lazypath)
+vim.opt.termguicolors = true
+
+-- Startup cost shown on the dashboard. lazy.nvim's own stats.startuptime is
+-- still zero at VimEnter, when the dashboard is built, so the elapsed time is
+-- measured here instead.
+local start_time = vim.uv.hrtime()
 
 require("lazy").setup({
+  {
+    "folke/tokyonight.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      style = "night",
+      transparent = false,
+      terminal_colors = true,
+      styles = {
+        comments = { italic = true },
+        keywords = { italic = true },
+      },
+    },
+    config = function(_, opts)
+      require("tokyonight").setup(opts)
+      vim.cmd.colorscheme("tokyonight-night")
+    end,
+  },
   {
     -- Picker, and the image support its preview window uses. snacks.image
     -- talks the kitty graphics protocol directly, so previews are real
@@ -49,21 +73,219 @@ require("lazy").setup({
     build = ":TSUpdate",
   },
   {
-    "OXY2DEV/markview.nvim",
-    lazy = false,
+    "saghen/blink.cmp",
+    version = "1.*",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    opts = {
+      keymap = { preset = "enter" },
+      appearance = { nerd_font_variant = "mono" },
+      completion = { documentation = { auto_show = false } },
+      sources = {
+        default = { "lsp", "path", "snippets", "buffer" },
+      },
+      fuzzy = { implementation = "prefer_rust_with_warning" },
+    },
+  },
+  {
+    "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "saghen/blink.cmp" },
+    config = function()
+      vim.lsp.config("*", {
+        capabilities = require("blink.cmp").get_lsp_capabilities(),
+      })
 
-    -- Completion for `blink.cmp`
-    -- dependencies = { "saghen/blink.cmp" },
+      for _, server in ipairs({ "pyright", "rust_analyzer", "marksman" }) do
+        vim.lsp.enable(server)
+      end
+    end,
   },
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {},
   },
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {
+      options = {
+        theme = "auto",
+        section_separators = { left = "", right = "" },
+        component_separators = { left = "", right = "" },
+        -- One status line for the whole screen instead of one per window, so
+        -- the mode block always sits in the same place.
+        globalstatus = true,
+      },
+      sections = {
+        -- Mode names differ in length (INSERT vs V-BLOCK), which would shift
+        -- everything to their right on every mode change. Padding them to a
+        -- fixed width leaves only the colour moving.
+        lualine_a = {
+          {
+            "mode",
+            fmt = function(name)
+              local width = 9
+              local pad = width - vim.fn.strchars(name)
+              if pad <= 0 then
+                return name
+              end
+              local left = math.floor(pad / 2)
+              return string.rep(" ", left) .. name .. string.rep(" ", pad - left)
+            end,
+          },
+        },
+        lualine_b = { "diff" },
+        lualine_c = { { "filename", path = 1 } },
+        lualine_x = { "diagnostics" },
+        lualine_y = {
+          function()
+            local names = {}
+            for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+              table.insert(names, client.name)
+            end
+            return table.concat(names, ",")
+          end,
+        },
+        lualine_z = { "location" },
+      },
+      extensions = { "nvim-tree" },
+    },
+  },
+  {
+    "nvimdev/dashboard-nvim",
+    event = "VimEnter",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      -- The most recently edited files, newest first. v:oldfiles keeps entries
+      -- for files that have since been deleted or moved, so unreadable paths
+      -- are dropped rather than shown as dead menu items.
+      local function recent_files(limit)
+        local entries = {}
+        for _, path in ipairs(vim.v.oldfiles or {}) do
+          if vim.fn.filereadable(path) == 1 then
+            table.insert(entries, {
+              icon = "  ",
+              desc = vim.fn.fnamemodify(path, ":~:."),
+              key = tostring(#entries + 1),
+              action = "edit " .. vim.fn.fnameescape(path),
+            })
+            if #entries == limit then
+              break
+            end
+          end
+        end
+        return entries
+      end
+
+      local center = {
+        { icon = "  ", desc = "Find File", key = "f", action = function() Snacks.picker.files() end },
+        { icon = "  ", desc = "Recent Files", key = "r", action = function() Snacks.picker.recent() end },
+        { icon = "  ", desc = "Live Grep", key = "g", action = function() Snacks.picker.grep() end },
+        { icon = "  ", desc = "New File", key = "n", action = "enew | startinsert" },
+        { icon = "  ", desc = "Config", key = "c", action = "edit " .. vim.fn.stdpath("config") .. "/init.lua" },
+      }
+
+      -- Appended directly: the doom theme pairs each center entry with a
+      -- rendered line containing a word character, so a blank spacer entry
+      -- would shift that mapping and break the draw.
+      vim.list_extend(center, recent_files(5))
+
+      local elapsed_ms = (vim.uv.hrtime() - start_time) / 1e6
+
+      require("dashboard").setup({
+        theme = "doom",
+        config = {
+          -- The N mark Neovim draws on its own :intro screen.
+          header = {
+            "",
+            "",
+            "│ ╲ ││",
+            "││╲╲││",
+            "││ ╲ │",
+            "",
+            "NVIM v" .. table.concat({ vim.version().major, vim.version().minor, vim.version().patch }, "."),
+            "",
+            "",
+          },
+          center = center,
+          footer = {
+            "",
+            ("⚡ %d plugins loaded in %.0fms"):format(require("lazy").stats().loaded, elapsed_ms),
+          },
+        },
+      })
+
+      -- dashboard-nvim highlights the header a line at a time, but the real
+      -- :intro mark uses one colour for the uprights and another for the
+      -- diagonal. Extmarks are placed per character once the buffer is drawn.
+      local mark_ns = vim.api.nvim_create_namespace("dashboard_nvim_mark")
+      local mark_colors = { ["│"] = "DiagnosticOk", ["╲"] = "Directory" }
+
+      -- DashboardLoaded rather than FileType: the theme rewrites the buffer
+      -- as it draws, which would drop extmarks placed any earlier.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "DashboardLoaded",
+        callback = function()
+          local buf = vim.api.nvim_get_current_buf()
+          if vim.bo[buf].filetype ~= "dashboard" then
+            return
+          end
+          -- The mark sits in the header, so only the top of the buffer is
+          -- scanned; nothing below it should be recoloured.
+          for lnum, line in ipairs(vim.api.nvim_buf_get_lines(buf, 0, 10, false)) do
+            for char, hl in pairs(mark_colors) do
+              local from = 1
+              while true do
+                local col = line:find(char, from, true)
+                if not col then
+                  break
+                end
+                vim.api.nvim_buf_set_extmark(buf, mark_ns, lnum - 1, col - 1, {
+                  end_col = col - 1 + #char,
+                  hl_group = hl,
+                  -- Above the 4096 that dashboard-nvim's own header
+                  -- highlight is placed at, so the mark keeps its colours.
+                  priority = 5000,
+                })
+                from = col + #char
+              end
+            end
+          end
+        end,
+      })
+    end,
+  },
+})
+
+-- Keep syntax highlighting enabled for every file. Treesitter is used when a
+-- parser is available; Neovim's built-in syntax highlighting remains the
+-- fallback for filetypes without an installed parser.
+vim.cmd("filetype plugin indent on")
+vim.cmd("syntax enable")
+
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    pcall(vim.treesitter.start, args.buf)
+  end,
 })
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local bufnr = args.buf
+    local function bufmap(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+    end
+
+    bufmap("n", "gd", vim.lsp.buf.definition, "Go to definition")
+    bufmap("n", "K", vim.lsp.buf.hover, "Show documentation")
+    bufmap("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+    bufmap({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+  end,
+})
 
 local opt = vim.opt
 
@@ -75,7 +297,6 @@ opt.signcolumn = "yes"
 opt.mouse = "a"
 opt.splitbelow = true
 opt.splitright = true
-opt.termguicolors = true
 
 -- Editing
 opt.expandtab = true
@@ -97,6 +318,14 @@ opt.undofile = true
 opt.updatetime = 250
 opt.timeoutlen = 400
 opt.confirm = true
+
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+})
 
 local undo_dir = vim.fn.stdpath("state") .. "/undo"
 vim.fn.mkdir(undo_dir, "p")

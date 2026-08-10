@@ -124,4 +124,8 @@ nvim
 
 The space key is the leader key: `Space w` saves, `Space q` quits, and `Space e` opens the file explorer. Use `i` to insert text, `Esc` to return to normal mode, and `:Tutor` for the built-in tutorial. `Ctrl-h/j/k/l` moves between split windows.
 
+Python, Rust, and Markdown language servers are managed by mise with exact version pins: Pyright, rust-analyzer, and Marksman. Running `./init.sh` installs them along with the other tools. Neovim uses blink.cmp for LSP, snippet, buffer, and filesystem path completion. `<Enter>` accepts a completion, `<C-space>` opens the menu, `<C-n>` / `<C-p>` navigate candidates, and `<Tab>` / `<S-Tab>` move through snippet placeholders.
+
+When an LSP is attached, `gd` jumps to a definition, `K` shows documentation, `Space rn` renames a symbol, and `Space ca` opens code actions. Use `:checkhealth vim.lsp` or `:LspInfo` when diagnosing a server that does not attach.
+
 Run `exit` when you are done. Because the command uses `--rm`, the container is removed automatically after it exits.
