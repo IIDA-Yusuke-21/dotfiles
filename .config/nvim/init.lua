@@ -20,9 +20,23 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   {
-    "nvim-telescope/telescope.nvim",
-    version = "*",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    -- Picker, and the image support its preview window uses. snacks.image
+    -- talks the kitty graphics protocol directly, so previews are real
+    -- pixels rather than the text approximation Telescope was limited to.
+    "folke/snacks.nvim",
+    priority = 1000,
+    lazy = false,
+    opts = {
+      picker = {
+        sources = {
+          -- rg/fd skip dotfiles by default, which hides most of this repo.
+          -- .git stays excluded by the source's own arguments.
+          files = { hidden = true },
+          grep = { hidden = true },
+        },
+      },
+      image = { enabled = true },
+    },
   },
   {
     "lewis6991/gitsigns.nvim",
@@ -45,22 +59,6 @@ require("lazy").setup({
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {},
-  },
-  {
-    "3rd/image.nvim",
-    build = false,
-    opts = {
-      backend = "kitty",
-      processor = "magick_cli",
-    },
-  },
-  {
-    'nvim-telescope/telescope.nvim', version = '*',
-    dependencies = {
-        'nvim-lua/plenary.nvim',
-        -- optional but recommended
-        { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
-    }
   },
 })
 
@@ -110,8 +108,10 @@ local opts = { silent = true }
 map("n", "<leader>w", "<cmd>write<cr>", { desc = "Save file" })
 map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit window" })
 map("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "File explorer" })
-map("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
-map("n", "<leader>rg", "<cmd>Telescope live_grep<cr>", { desc = "Live grep" })
+map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
+map("n", "<leader>rg", function() Snacks.picker.grep() end, { desc = "Live grep" })
+map("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
+map("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Recent files" })
 map("n", "<leader>h", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
 
 -- Move between splits without reaching for Ctrl-w first.
@@ -131,3 +131,17 @@ map("n", "N", "Nzzzv", opts)
 
 -- Use the current working directory for :find and :Explore.
 vim.cmd([[autocmd BufEnter * silent! lcd %:p:h]])
+
+-- Reopen files at the cursor position from the previous session.
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function(args)
+    local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
+    local line = mark[1]
+    if line < 1 or line > vim.api.nvim_buf_line_count(args.buf) then
+      return
+    end
+
+    local text = vim.api.nvim_buf_get_lines(args.buf, line - 1, line, false)[1] or ""
+    vim.api.nvim_win_set_cursor(0, { line, math.min(mark[2], #text) })
+  end,
+})

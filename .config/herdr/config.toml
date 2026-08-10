@@ -80,9 +80,20 @@ description = "open explorer in the current directory"
 [[keys.command]]
 key = "prefix+<"
 type = "popup"
-command = "$EDITOR ~/.config/herdr/config.toml"
+command = "exec nvim ~/.config/herdr/config.toml"
 width = "80%"
 height = "80%"
+
+[[keys.command]]
+key = "alt+u"
+type = "plugin_action"
+command = "jugyo.nav-history.back"
+
+[[keys.command]]
+key = "alt+r"
+type = "plugin_action"
+command = "jugyo.nav-history.forward"
+
 
 # [[keys.command]]              # open in a split beside your work
 # key = "prefix+f"
