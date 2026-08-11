@@ -1,0 +1,49 @@
+# See the full configuration reference: https://rioterm.com/docs
+
+confirm-before-quit = true
+
+[navigation]
+# タブ関連のデフォルトキーバインドを無効化
+mode = "Plain"
+
+[env]
+TERM = "xterm-256color"
+
+[bindings]
+keys = [
+  # 有効にするキーバインド
+  { key = "-", with = "control", action = "DecreaseFontSize" },
+  { key = ";", with = "control | shift", action = "IncreaseFontSize" },
+  
+  # 以下、Windows版Rioのデフォルトキーバインドを解除
+  { key = ",",     with = "control | shift", action = "ReceiveChar" },
+  { key = "space", with = "control | shift", action = "ReceiveChar" },
+# { key = "c",     with = "control | shift", action = "ReceiveChar" },
+# { key = "v",     with = "control | shift", action = "ReceiveChar" },
+  { key = "n",     with = "control | shift", action = "ReceiveChar" },
+  { key = "t",     with = "control | shift", action = "ReceiveChar" },
+  { key = "tab", with = "control",         action = "ReceiveChar" },
+  { key = "tab", with = "control | shift", action = "ReceiveChar" },
+  { key = "]",   with = "control | shift", action = "ReceiveChar" },
+  { key = "[",   with = "control | shift", action = "ReceiveChar" },
+  { key = "0", with = "control",         action = "ReceiveChar" },
+  { key = "w", with = "control | shift", action = "ReceiveChar" },
+  { key = "1", with = "control | shift", action = "ReceiveChar" },
+  { key = "2", with = "control | shift", action = "ReceiveChar" },
+  { key = "3", with = "control | shift", action = "ReceiveChar" },
+  { key = "4", with = "control | shift", action = "ReceiveChar" },
+  { key = "5", with = "control | shift", action = "ReceiveChar" },
+  { key = "6", with = "control | shift", action = "ReceiveChar" },
+  { key = "7", with = "control | shift", action = "ReceiveChar" },
+  { key = "8", with = "control | shift", action = "ReceiveChar" },
+  { key = "9", with = "control | shift", action = "ReceiveChar" },
+  { key = "f", with = "control | shift", action = "ReceiveChar" },
+  { key = "b", with = "control | shift", action = "ReceiveChar" },
+  { key = "r", with = "control | shift", action = "ReceiveChar" },
+  { key = "d", with = "control | shift", action = "ReceiveChar" },
+  { key = "up",    with = "control | shift | alt", action = "ReceiveChar" },
+  { key = "down",  with = "control | shift | alt", action = "ReceiveChar" },
+  { key = "left",  with = "control | shift | alt", action = "ReceiveChar" },
+  { key = "right", with = "control | shift | alt", action = "ReceiveChar" },
+  { key = "p", with = "control | shift", action = "ReceiveChar" },
+]

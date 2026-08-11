@@ -26,3 +26,10 @@ fi
 # when it runs the preview command, not when this file is sourced.
 # shellcheck disable=SC2016
 export FZF_DEFAULT_OPTS='--preview "if file --mime-type -b {} | grep -q ^image/ && command -v chafa >/dev/null 2>&1; then chafa --size ${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES} {}; elif command -v bat >/dev/null 2>&1; then bat --color=always --style=header,grid --line-range :100 {}; else head -n 100 {}; fi"'
+
+# Machine-specific settings. Link $HOME/.bashrc.local by hand to the matching
+# variant in .bashrc.local.d (wsl, linux, ...). Sourced last so it can override
+# everything above.
+if [ -f "$HOME/.bashrc.local" ]; then
+  . "$HOME/.bashrc.local"
+fi
