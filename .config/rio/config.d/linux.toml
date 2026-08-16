@@ -1,3 +1,6 @@
+# Rio configuration for a native Linux machine. Link it by hand:
+#   ln -sfn "$PWD/.config/rio/config.d/linux.toml" "$HOME/.config/rio/config.toml"
+#
 # See the full configuration reference: https://rioterm.com/docs
 
 confirm-before-quit = true
@@ -9,13 +12,27 @@ mode = "Plain"
 [env]
 TERM = "xterm-256color"
 
+[fonts]
+# ASCII は Rio 既定の Cascadia Code のまま、日本語の範囲だけ Noto Sans Mono
+# CJK JP に割り当てる。fonts-noto-cjk パッケージに含まれる等幅 CJK フォント。
+#
+# U+2000-U+2E7F（罫線、■●▲、①②、→）は意図的に含めない。East Asian
+# Ambiguous 幅の文字なので日本語フォントに振ると全角幅で描かれ、tmux のペイン
+# 境界や Neovim の UI が崩れる。Rio は use-drawable-chars（既定で true）で
+# 罫線を自前描画するため、既定のままにしておく。
+symbol-map = [
+  { start = "3000", end = "30FF", font-family = "Noto Sans Mono CJK JP" }, # 記号・ひらがな・カタカナ
+  { start = "4E00", end = "9FFF", font-family = "Noto Sans Mono CJK JP" }, # 漢字
+  { start = "FF00", end = "FFEF", font-family = "Noto Sans Mono CJK JP" }, # 全角英数・半角カナ
+]
+
 [bindings]
 keys = [
   # 有効にするキーバインド
   { key = "-", with = "control", action = "DecreaseFontSize" },
   { key = ";", with = "control | shift", action = "IncreaseFontSize" },
-  
-  # 以下、Windows版Rioのデフォルトキーバインドを解除
+
+  # 以下、Rioのデフォルトキーバインドを解除
   { key = ",",     with = "control | shift", action = "ReceiveChar" },
   { key = "space", with = "control | shift", action = "ReceiveChar" },
 # { key = "c",     with = "control | shift", action = "ReceiveChar" },

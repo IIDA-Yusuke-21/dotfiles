@@ -33,6 +33,28 @@ After cloning this repository, initialize the submodule before running `init.sh`
 git submodule update --init --recursive
 ```
 
+## Rio
+
+The [Rio](https://rioterm.com/) configuration is not linked by `init.sh`, because on WSL Rio runs on the Windows side and cannot follow a symlink into the WSL filesystem. `.config/rio/config.d` holds one complete config per environment; place the matching one by hand.
+
+On a native Linux machine, link it:
+
+```bash
+ln -sfn "$PWD/.config/rio/config.d/linux.toml" "$HOME/.config/rio/config.toml"
+```
+
+On WSL, copy it to the Windows config path instead:
+
+```bash
+cp .config/rio/config.d/wsl.toml \
+   "$(wslpath "$(cmd.exe /c 'echo %LOCALAPPDATA%' 2>/dev/null | tr -d '\r')")/rio/config.toml"
+```
+
+The two files differ in exactly two places, and are otherwise identical — keep them in sync when you change a binding.
+
+- `[shell]`, which only the WSL variant sets, so Rio starts `wsl.exe` in the home directory.
+- `[fonts]`, where `symbol-map` assigns the Japanese Unicode ranges to a font that ships with the platform: BIZ UDGothic on Windows, Noto Sans Mono CJK JP on Linux. ASCII keeps Rio's bundled Cascadia Code in both. The ranges stop short of U+2000-U+2E7F on purpose: those characters are East Asian Ambiguous width, and rendering them full-width breaks tmux pane borders and the Neovim UI.
+
 ## Trying It with Docker
 
 You can test `init.sh` in a fresh environment on Docker. This is useful when you want to verify the setup without modifying your host `$HOME`.
