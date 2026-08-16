@@ -117,4 +117,14 @@ setup_dotfiles_bashrc() {
 fi'
 }
 
+setup_history_sync() {
+  ensure_block \
+    '# >>> dotfiles history sync >>>' \
+    '# <<< dotfiles history sync <<<' \
+    'if declare -F __enable_history_sync >/dev/null; then
+  __enable_history_sync
+fi'
+}
+
 setup_dotfiles_bashrc
+setup_history_sync

@@ -15,6 +15,25 @@ fi
 export EDITOR="nvim"
 export VISUAL="nvim"
 
+# Share command history between concurrent Bash sessions (for example, tmux
+# and Herdr panes).  Write this session's new entries, then read entries
+# appended by the other sessions whenever Bash is about to show a prompt.
+__history_sync() {
+  builtin history -a
+  builtin history -n
+}
+
+__enable_history_sync() {
+  shopt -s histappend
+
+  case ";${PROMPT_COMMAND-};" in
+    *';__history_sync;'*) ;;
+    *) PROMPT_COMMAND="__history_sync${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+  esac
+}
+
+__enable_history_sync
+
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init bash)"
 fi
