@@ -1,0 +1,2 @@
+- Run `git add` and `git commit` after editing.
+- Do not edit code until the user allows it or gives explicit instructions.
