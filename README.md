@@ -144,9 +144,15 @@ source ~/.bashrc
 nvim
 ```
 
-The space key is the leader key: `Space w` saves, `Space q` quits, and `Space e` opens the file explorer. Use `i` to insert text, `Esc` to return to normal mode, and `:Tutor` for the built-in tutorial. `Ctrl-h/j/k/l` moves between split windows.
+The space key is the leader key: `Space w` saves, `Space q` quits, and `Space e` opens the file explorer. Use `i` to insert text and `Esc` to return to normal mode. On WSL, `Ctrl-j` also returns to normal mode even when Windows IME is holding ordinary letters for composition. Use `:Tutor` for the built-in tutorial. `Ctrl-h/j/k/l` moves between split windows in normal mode.
 
 Python, Rust, and Markdown language servers are managed by mise with exact version pins: Pyright, rust-analyzer, and Marksman. Running `./init.sh` installs them along with the other tools. Neovim uses blink.cmp for LSP, snippet, buffer, and filesystem path completion. `<Enter>` accepts a completion, `<C-space>` opens the menu, `<C-n>` / `<C-p>` navigate candidates, and `<Tab>` / `<S-Tab>` move through snippet placeholders.
+
+On WSL, `init.sh` also cross-builds a small Windows IME helper from
+`script/ime-off` and installs it as `~/.local/bin/ime-off.exe`. Neovim invokes
+it asynchronously whenever it enters normal mode, returning Microsoft IME to
+direct (half-width alphanumeric) input. The integration is skipped on native
+Linux and when the helper is not present.
 
 When an LSP is attached, `gd` jumps to a definition, `K` shows documentation, `Space rn` renames a symbol, and `Space ca` opens code actions. Use `:checkhealth vim.lsp` or `:LspInfo` when diagnosing a server that does not attach.
 

@@ -106,6 +106,18 @@ require("lazy").setup({
     opts = {},
   },
   {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<C-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
+  {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
@@ -414,11 +426,15 @@ opt.undodir = undo_dir
 local map = vim.keymap.set
 local opts = { silent = true }
 
+local function project_root()
+  return vim.fs.root(0, { ".git" }) or vim.fn.getcwd()
+end
+
 -- The space key is the leader: <leader>w means Space, then w.
 map("n", "<leader>w", "<cmd>write<cr>", { desc = "Save file" })
 map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit window" })
 map("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "File explorer" })
-map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
+map("n", "<leader>ff", function() Snacks.picker.files({ cwd = project_root() }) end, { desc = "Find files" })
 map("n", "<leader>rg", function() Snacks.picker.grep() end, { desc = "Live grep" })
 map("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
 map("n", "<leader>fr", function() Snacks.picker.recent() end, { desc = "Recent files" })
@@ -430,8 +446,26 @@ map("n", "<C-j>", "<C-w>j", opts)
 map("n", "<C-k>", "<C-w>k", opts)
 map("n", "<C-l>", "<C-w>l", opts)
 
--- Escape insert mode with a familiar double-tap.
-map("i", "jj", "<Esc>")
+-- Plain letters are held by the Windows IME while it is composing, so jk can
+-- only work when the IME is already off. Ctrl-j provides the same escape path
+-- with a control key that the terminal can deliver while the IME is active.
+map("i", "jk", "<Esc>")
+map("i", "<C-j>", "<Esc>", { desc = "Leave insert mode while IME is active" })
+
+-- Windows owns the IME used by WSL terminals. A tiny Windows helper on PATH
+-- switches it to direct (half-width alphanumeric) input whenever Neovim
+-- returns to normal mode. Other platforms and machines without the helper
+-- simply skip this integration.
+local ime_off = vim.fn.exepath("ime-off.exe")
+if ime_off ~= "" then
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    pattern = "*:n",
+    callback = function()
+      vim.system({ ime_off }, { stdout = false, stderr = false }, function() end)
+    end,
+    desc = "Turn off the Windows IME in normal mode",
+  })
+end
 
 -- Keep the cursor centered while scrolling and searching.
 map("n", "<C-d>", "<C-d>zz", opts)

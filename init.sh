@@ -57,6 +57,7 @@ link_path "$DOTFILES_DIR/.config/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 
 if [ "$RUN_MISE" -eq 1 ]; then
   "$DOTFILES_DIR/script/setup-mise.sh"
+  "$DOTFILES_DIR/script/setup-ime-off.sh"
   "$DOTFILES_DIR/script/setup-bashrc.sh"
 fi
 
