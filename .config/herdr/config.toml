@@ -48,6 +48,7 @@ focus_pane_up = "alt+k"
 focus_pane_right = "alt+l"
 previous_tab = "alt+shift+h"
 next_tab = "alt+shift+l"
+# cycle_pane_previous = "ctrl+tab"
 
 [[keys.command]]
 key = "prefix+shift+g"
@@ -80,9 +81,7 @@ description = "open explorer in the current directory"
 [[keys.command]]
 key = "prefix+<"
 type = "popup"
-# command = "exec nvim ~/.config/herdr/config.toml"
-
-command = "echo $EDITOR && sleep 10"
+command = "exec nvim ~/.config/herdr/config.toml"
 width = "80%"
 height = "80%"
 
